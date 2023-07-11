@@ -66,7 +66,7 @@ class Game {
 
   pass(player: Player) {
     if (this.nextPlayer !== player) return
-    this.updateNextPlayer()
+    this.play(player, [])
   }
 
   play(player: Player, cards: number[]) {
