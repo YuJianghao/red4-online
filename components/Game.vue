@@ -2,7 +2,8 @@
 import { reactive, provide } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 import { request } from '../api'
-const state = reactive({ game: { players: { you: [], other: [] }, ground: [[]], hearts: [] } })
+import { rankMap } from '../utils';
+const state = reactive({ game: { players: { you: [], other: [] }, ground: [[]], hearts: { a: -1, b: -1 } } })
 const selected = ref([])
 const update = (body) => {
   return request(body).then(data => state.game = data)
@@ -21,9 +22,14 @@ const disabled = computed(() => ({
   nextRound: state.game.players.you.length !== 0 && state.game.players.other.length !== 0,
   play: selected.value.length === 0 || (state.game.you !== state.game.nextPlayer),
 }))
+const banners = computed(() => [
+  `第 ${state.game.round} 轮`,
+  `玩家 ${state.game.nextPlayer} 出牌`,
+].join(' | '))
 </script>
 <template>
   <div class="game">
+    <div class="banner"> {{ banners }}</div>
     <Deck :cards="state.game.players.other" />
     <Deck :cards="state.game.ground[state.game.ground.length - 1] ?? []" visible />
     <Deck :cards="state.game.players.you" visible selectable />
@@ -44,6 +50,17 @@ const disabled = computed(() => ({
 <style>
 .game {
   padding: 0 4px;
+}
+
+.banner {
+  font-size: small;
+  text-align: center;
+  padding: 10px 0;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  margin-bottom: 10px;
 }
 
 .buttons {

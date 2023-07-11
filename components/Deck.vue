@@ -1,4 +1,5 @@
 <script setup>
+import { getCard } from '../utils';
 import { inject } from 'vue'
 const props = defineProps({
   title: {
@@ -18,28 +19,6 @@ const props = defineProps({
   }
 })
 
-const suitMap = ["♠", "♥", "♦", "♣"]
-
-const rankMap = [
-  "A",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "J",
-  "Q",
-  "K",
-]
-function getCard(card) {
-  const rank = rankMap[card % 13]
-  const suit = suitMap[Math.floor(card / 13)]
-  return { rank, suit }
-}
 const state = inject("state")
 const selected = inject("selected")
 function onSelect(card) {
@@ -93,6 +72,10 @@ function getCardClass(card) {
 
 .deck+.deck {
   margin-top: 10px;
+}
+
+.deck-title {
+  text-align: center;
 }
 
 .deck-content {

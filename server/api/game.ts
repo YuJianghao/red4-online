@@ -20,7 +20,7 @@ class Game {
   ground: number[][] = []
   nextPlayer: Player = "a"
   first = false
-  hearts: number[] = []
+  hearts = { a: -1, b: -1 }
 
   get round() {
     return this.deck.length === 0 ? 2 : 1
@@ -29,7 +29,6 @@ class Game {
   generateDeck() {
     const arr = Array.from({ length: 52 }).map((_, i) => i)
     this.deck = arr.sort(() => Math.random() - 0.5)
-    this.ground = []
   }
 
   nextRound() {
@@ -39,7 +38,8 @@ class Game {
     this.players.a = sortCard(this.deck.splice(0, 13))
     this.players.b = sortCard(this.deck.splice(0, 13))
     this.first = true
-    this.hearts = []
+    this.hearts = { a: -1, b: -1 }
+    this.ground = []
     this.updateNextPlayer()
   }
 
@@ -47,18 +47,19 @@ class Game {
     // 第一次，找红四
     if (this.first) {
       this.first = false
-      const aHeart = Math.min(
+      const a = Math.min(
         ...this.players.a.filter(
-          (card) => HEART_FOUR <= card && card < HEART_KING
+          (card) => HEART_FOUR <= card && card <= HEART_KING
         )
       )
-      const bHeart = Math.min(
+      const b = Math.min(
         ...this.players.b.filter(
-          (card) => HEART_FOUR <= card && card < HEART_KING
+          (card) => HEART_FOUR <= card && card <= HEART_KING
         )
       )
-      this.hearts = [aHeart, bHeart]
-      this.nextPlayer = aHeart < bHeart ? "a" : "b"
+      this.hearts = { a, b }
+      this.nextPlayer = a < b ? "a" : "b"
+      return
     }
     this.nextPlayer = this.nextPlayer === "a" ? "b" : "a"
   }
@@ -82,12 +83,14 @@ class Game {
   }
 
   getState(player: Player) {
+    const other = player === "a" ? "b" : "a"
     return {
       you: player,
+      other,
       deck: this.deck,
       players: {
         you: this.players[player],
-        other: this.players[player === "a" ? "b" : "a"],
+        other: this.players[other],
       },
       ground: this.ground,
       nextPlayer: this.nextPlayer,
