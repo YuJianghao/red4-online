@@ -14,13 +14,16 @@ const switchPlayer = () => update({ switch: true }).then(() => selected.value = 
 const play = () => update({ play: selected.value }).then(() => selected.value = [])
 const undo = () => update({ undo: true })
 const refresh = () => update({ refresh: true }).then(() => selected.value = [])
+const pass = () => update({ pass: true }).then(() => selected.value = [])
 provide('state', state)
 provide('update', update)
 provide('selected', selected)
+const isMyTurn = computed(() => state.game.you === state.game.nextPlayer)
 const disabled = computed(() => ({
   undo: state.game.ground.length < 1 || state.game.you === state.game.nextPlayer,
   nextRound: state.game.players.you.length !== 0 && state.game.players.other.length !== 0,
-  play: selected.value.length === 0 || (state.game.you !== state.game.nextPlayer),
+  play: selected.value.length === 0 || !isMyTurn.value,
+  pass: !isMyTurn.value,
 }))
 const banners = computed(() => [
   `第 ${state.game.round} 轮`,
@@ -42,7 +45,8 @@ const banners = computed(() => [
       <div class="button-line">
         <button @click="nextRound" :disabled="disabled.nextRound">下一轮</button>
         <button @click="undo" :disabled="disabled.undo">悔棋</button>
-        <button @click="play" :disabled="disabled.play">出牌</button>
+        <button @click="play" :disabled="disabled.play">{{ !isMyTurn ? "对方出牌" : "出牌" }}</button>
+        <button @click="pass" :disabled="disabled.pass">{{ !isMyTurn ? "对方出牌" : "不出" }}</button>
       </div>
     </div>
   </div>
@@ -67,6 +71,7 @@ const banners = computed(() => [
   position: fixed;
   bottom: 0;
   width: 100%;
+  color: black;
 }
 
 .button-line {

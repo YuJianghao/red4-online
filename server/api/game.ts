@@ -64,6 +64,11 @@ class Game {
     this.nextPlayer = this.nextPlayer === "a" ? "b" : "a"
   }
 
+  pass(player: Player) {
+    if (this.nextPlayer !== player) return
+    this.updateNextPlayer()
+  }
+
   play(player: Player, cards: number[]) {
     this.ground.push(cards)
     this.players[player] = this.players[player].filter(
@@ -142,5 +147,6 @@ export default defineEventHandler(async (event) => {
   if (body.undo) undoHandler(event)
   else if (body.nextRound) game.nextRound()
   else if (body.play) game.play(player, body.play)
+  else if (body.pass) game.pass(player)
   return stateHandler(event)
 })
