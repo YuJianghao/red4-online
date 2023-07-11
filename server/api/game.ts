@@ -70,7 +70,7 @@ class Game {
   }
 
   play(player: Player, cards: number[]) {
-    this.ground.push(cards)
+    this.ground.push(sortCard(cards))
     this.players[player] = this.players[player].filter(
       (card) => !cards.includes(card)
     )
