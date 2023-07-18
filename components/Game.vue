@@ -46,9 +46,9 @@ const banners = computed(() => [
       </div>
       <div class="button-line">
         <button @click="undo" :disabled="disabled.undo">悔棋</button>
-        <button @click="play" :disabled="disabled.play">{{ !isMyTurn ? "对方出牌" : "出牌" }}</button>
-        <button @click="pass" :disabled="disabled.pass">{{ !isMyTurn ? "对方出牌" : "不出" }}</button>
         <button @click="giveCards">进贡</button>
+        <button @click="pass" :disabled="disabled.pass">{{ !isMyTurn ? "对方出牌" : "不出" }}</button>
+        <button @click="play" :disabled="disabled.play">{{ !isMyTurn ? "对方出牌" : "出牌" }}</button>
       </div>
     </div>
   </div>
