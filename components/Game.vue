@@ -15,6 +15,7 @@ const play = () => update({ play: selected.value }).then(() => selected.value = 
 const undo = () => update({ undo: true })
 const refresh = () => update({ refresh: true }).then(() => selected.value = [])
 const pass = () => update({ pass: true }).then(() => selected.value = [])
+const giveCards = () => update({ giveCards: selected.value }).then(() => selected.value = [])
 provide('state', state)
 provide('update', update)
 provide('selected', selected)
@@ -39,14 +40,15 @@ const banners = computed(() => [
     <div class="buttons">
       <div class="button-line">
         <button @click="refresh">重置游戏</button>
+        <button @click="nextRound" :disabled="disabled.nextRound">下一轮</button>
         <button disabled>当前玩家：{{ state.game.you }}</button>
         <button @click="switchPlayer">切换玩家</button>
       </div>
       <div class="button-line">
-        <button @click="nextRound" :disabled="disabled.nextRound">下一轮</button>
         <button @click="undo" :disabled="disabled.undo">悔棋</button>
         <button @click="play" :disabled="disabled.play">{{ !isMyTurn ? "对方出牌" : "出牌" }}</button>
         <button @click="pass" :disabled="disabled.pass">{{ !isMyTurn ? "对方出牌" : "不出" }}</button>
+        <button @click="giveCards">进贡</button>
       </div>
     </div>
   </div>

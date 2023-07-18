@@ -87,6 +87,14 @@ class Game {
     }
   }
 
+  giveCards(player: Player, cards: number[]) {
+    const other = player === "a" ? "b" : "a"
+    this.players[other] = sortCard(this.players[other].concat(cards))
+    this.players[player] = this.players[player].filter(
+      (card) => !cards.includes(card)
+    )
+  }
+
   getState(player: Player) {
     const other = player === "a" ? "b" : "a"
     return {
@@ -148,5 +156,6 @@ export default defineEventHandler(async (event) => {
   else if (body.nextRound) game.nextRound()
   else if (body.play) game.play(player, body.play)
   else if (body.pass) game.pass(player)
+  else if (body.giveCards) game.giveCards(player, body.giveCards)
   return stateHandler(event)
 })
