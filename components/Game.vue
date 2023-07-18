@@ -2,20 +2,23 @@
 import { reactive, provide } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 import { request } from '../api'
-import { rankMap } from '../utils';
 const state = reactive({ game: { players: { you: [], other: [] }, ground: [[]], hearts: { a: -1, b: -1 } } })
 const selected = ref([])
+const timestamp = ref(0)
 const update = (body) => {
-  return request(body).then(data => state.game = data)
+  return request(body).then(({ game, time }) => {
+    if (time <= timestamp.value) return
+    state.game = game
+  })
 }
 useIntervalFn(update, 1000)
+const refresh = () => update({ refresh: true }).then(() => selected.value = [])
 const nextRound = () => update({ nextRound: true }).then(() => selected.value = [])
 const switchPlayer = () => update({ switch: true }).then(() => selected.value = [])
-const play = () => update({ play: selected.value }).then(() => selected.value = [])
 const undo = () => update({ undo: true })
-const refresh = () => update({ refresh: true }).then(() => selected.value = [])
-const pass = () => update({ pass: true }).then(() => selected.value = [])
 const giveCards = () => update({ giveCards: selected.value }).then(() => selected.value = [])
+const pass = () => update({ pass: true }).then(() => selected.value = [])
+const play = () => update({ play: selected.value }).then(() => selected.value = [])
 provide('state', state)
 provide('update', update)
 provide('selected', selected)
@@ -28,72 +31,83 @@ const disabled = computed(() => ({
 }))
 const banners = computed(() => [
   `第 ${state.game.round} 轮`,
+  `当前玩家 ${state.game.you}`,
   `玩家 ${state.game.nextPlayer} 出牌`,
 ].join(' | '))
 </script>
 <template>
   <div class="game">
-    <div class="banner"> {{ banners }}</div>
+    <div class="banner">
+      {{ banners }}
+    </div>
     <Deck :cards="state.game.players.other" />
     <Deck :cards="state.game.ground[state.game.ground.length - 1] ?? []" visible />
+    <div class="actions" :class="{ visible: isMyTurn }">
+      <button @click="pass" :disabled="disabled.pass">不出</button>
+      <button @click="play" :disabled="disabled.play">出牌</button>
+    </div>
     <Deck :cards="state.game.players.you" visible selectable />
-    <div class="buttons">
-      <div class="button-line">
-        <button @click="refresh">重置游戏</button>
-        <button @click="nextRound" :disabled="disabled.nextRound">下一轮</button>
-        <button disabled>当前玩家：{{ state.game.you }}</button>
-        <button @click="switchPlayer">切换玩家</button>
-      </div>
-      <div class="button-line">
-        <button @click="undo" :disabled="disabled.undo">悔棋</button>
-        <button @click="giveCards">进贡</button>
-        <button @click="pass" :disabled="disabled.pass">{{ !isMyTurn ? "对方出牌" : "不出" }}</button>
-        <button @click="play" :disabled="disabled.play">{{ !isMyTurn ? "对方出牌" : "出牌" }}</button>
-      </div>
+    <div class="actions visible">
+      <button class="secondary" @click="refresh">重置游戏</button>
+      <button class="secondary" @click="nextRound" :disabled="disabled.nextRound">下一轮</button>
+      <button class="secondary" @click="switchPlayer">切换玩家</button>
+      <button class="secondary" @click="undo" :disabled="disabled.undo">悔棋</button>
+      <button class="secondary" @click="giveCards">进贡</button>
     </div>
   </div>
 </template>
 <style>
 .game {
-  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.deck {
+  flex: 1;
 }
 
 .banner {
   font-size: small;
   text-align: center;
-  padding: 10px 0;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 2px;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-  margin-bottom: 10px;
+  font-weight: lighter;
+  padding: 2px 0;
+  margin: 10px 0;
 }
 
-.buttons {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  color: black;
+.banner .link {
+  color: cornflowerblue;
 }
 
-.button-line {
+.actions {
   display: flex;
-  justify-content: space-around;
-  padding: 10px;
+  justify-content: center;
+  opacity: 0;
+  margin-bottom: 16px;
   gap: 10px;
 }
 
-.button-line+.button-line {
-  padding-top: 0;
+.actions.visible {
+  opacity: 1;
 }
 
-.buttons button {
-  flex: 1;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  line-height: 2;
-  border-radius: 2px;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+button {
+  border-radius: 100px;
+  box-shadow: 0 1px 1px orange;
+  outline: none;
+  border: none;
+  background-color: orange;
+  padding: 4px 16px;
+  color: white;
+  font-weight: bolder;
+}
+
+button.secondary {
+  background-color: dodgerblue;
+  box-shadow: none;
+}
+
+button:disabled {
+  opacity: 0.5;
 }
 </style>

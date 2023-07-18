@@ -141,7 +141,10 @@ const idHandler = defineEventHandler(async (event) => {
 
 const stateHandler = defineEventHandler(async (event) => {
   const player = event.context.id as Player
-  return game.getState(player)
+  return {
+    game: game.getState(player),
+    time: +Date.now(),
+  }
 })
 
 const undoHandler = defineEventHandler(async (event) => {

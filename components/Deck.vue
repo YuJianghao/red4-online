@@ -66,14 +66,6 @@ function getCardClass(card) {
   </div>
 </template>
 <style>
-.deck {
-  margin: 0 auto;
-}
-
-.deck+.deck {
-  margin-top: 10px;
-}
-
 .deck-title {
   text-align: center;
 }
@@ -102,7 +94,6 @@ function getCardClass(card) {
   font-size: 20px;
   border-radius: 5px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-  transition: all .1s ease-in-out;
   background-color: rgb(255, 251, 251);
 }
 
