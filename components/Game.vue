@@ -47,7 +47,7 @@ const banners = computed(() => [
       <button @click="play" :disabled="disabled.play">出牌</button>
     </div>
     <Deck :cards="state.game.players.you" visible selectable />
-    <div class="actions visible">
+    <div class="actions visible compact">
       <button class="secondary" @click="refresh">重置游戏</button>
       <button class="secondary" @click="nextRound" :disabled="disabled.nextRound">下一轮</button>
       <button class="secondary" @click="switchPlayer">切换玩家</button>
@@ -84,11 +84,23 @@ const banners = computed(() => [
   justify-content: center;
   opacity: 0;
   margin-bottom: 16px;
-  gap: 10px;
 }
 
 .actions.visible {
   opacity: 1;
+}
+
+
+.actions button {
+  border-radius: 0;
+}
+
+.actions button:first-child {
+  border-radius: 100px 0 0 100px;
+}
+
+.actions button:last-child {
+  border-radius: 0 100px 100px 0;
 }
 
 button {
