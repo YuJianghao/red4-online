@@ -17,8 +17,6 @@ const state = inject('state')
   transition: all 1s ease-in-out;
 }
 
-
-
 .notification-enter-from {
   opacity: 0;
   transform: translateY(30px);
@@ -49,7 +47,6 @@ const state = inject('state')
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: center;

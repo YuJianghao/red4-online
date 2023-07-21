@@ -27,7 +27,7 @@ const update = (body) => {
   })
 }
 useIntervalFn(update, 1000)
-const refresh = () => update({ refresh: true }).then(() => selected.value = [])
+const refresh = () => update({ refresh: true }).then(() => selected.value = []).then(nextRound)
 const nextRound = () => update({ nextRound: true }).then(() => selected.value = [])
 const switchPlayer = () => update({ switch: true }).then(() => selected.value = [])
 const undo = () => update({ undo: true })
@@ -44,18 +44,17 @@ const disabled = computed(() => ({
   play: selected.value.length === 0 || !isMyTurn.value,
   pass: !isMyTurn.value,
 }))
-const banners = computed(() => [
-  `第 ${state.game.round} 轮`,
-  `当前玩家 ${state.game.you}`,
-  `玩家 ${state.game.nextPlayer} 出牌`,
-].join(' | '))
 const otherVisible = computed(() => state.game.players.other.length === 0 || state.game.players.you.length === 0)
+const showModal = ref(false)
+const showMenu = () => showModal.value = true
+const menuItems = computed(() => [
+  { label: `当前玩家 ${state.game.you}` },
+  { label: '切换玩家', action: switchPlayer },
+  { label: '重置游戏', action: refresh },
+])
 </script>
 <template>
   <div class="game">
-    <div class="banner">
-      {{ banners }}
-    </div>
     <Deck :cards="state.game.players.other" :visible="otherVisible" />
     <Deck :cards="state.game.ground[state.game.ground.length - 1] ?? []" visible />
     <div class="actions" :class="{ visible: isMyTurn }">
@@ -63,21 +62,23 @@ const otherVisible = computed(() => state.game.players.other.length === 0 || sta
       <button @click="play" :disabled="disabled.play">出牌</button>
     </div>
     <Deck :cards="state.game.players.you" visible selectable />
-    <div class="actions visible compact">
-      <button class="secondary" @click="refresh">重置游戏</button>
-      <button class="secondary" @click="nextRound" :disabled="disabled.nextRound">下一轮</button>
-      <button class="secondary" @click="switchPlayer">切换玩家</button>
+    <div class="actions visible">
+      <button class="secondary" @click="showMenu">菜单</button>
+      <button class="secondary" @click="nextRound" :disabled="disabled.nextRound">{{ state.game.round
+        === 1 ? "下一轮" : "下一把" }}</button>
       <button class="secondary" @click="undo" :disabled="disabled.undo">悔棋</button>
       <button class="secondary" @click="giveCards">进贡</button>
     </div>
   </div>
   <Notifications />
+  <MenuModal v-model="showModal" :menuItems="menuItems" />
 </template>
 <style>
 .game {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  padding: 16px 0;
 }
 
 .deck {
@@ -131,12 +132,16 @@ button {
   font-weight: bolder;
 }
 
+button:disabled {
+  background-color: #f8d39d;
+}
+
 button.secondary {
   background-color: dodgerblue;
   box-shadow: none;
 }
 
-button:disabled {
-  opacity: 0.5;
+button.secondary:disabled {
+  background-color: #a1c7fb;
 }
 </style>
