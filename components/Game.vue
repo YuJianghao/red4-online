@@ -2,13 +2,28 @@
 import { reactive, provide } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 import { request } from '../api'
-const state = reactive({ game: { players: { you: [], other: [] }, ground: [[]], hearts: { a: -1, b: -1 } } })
+const state = reactive({
+  game: { players: { you: [], other: [] }, ground: [[]], hearts: { a: -1, b: -1 } },
+  notifications: []
+})
 const selected = ref([])
 const timestamp = ref(0)
+const notificationsToAdd = ref([])
+
+useIntervalFn(() => {
+  if (notificationsToAdd.value.length === 0) return
+  const notification = notificationsToAdd.value[0]
+  state.notifications.push(notification)
+  setTimeout(() => {
+    state.notifications = state.notifications.filter(n => n.id !== notification.id)
+  }, notification.duration);
+  notificationsToAdd.value = notificationsToAdd.value.slice(1)
+}, 300)
 const update = (body) => {
-  return request(body).then(({ game, time }) => {
+  return request(body).then(({ game, time, notifications }) => {
     if (time <= timestamp.value) return
     state.game = game
+    notificationsToAdd.value = [...notificationsToAdd.value, ...notifications]
   })
 }
 useIntervalFn(update, 1000)
@@ -24,7 +39,7 @@ provide('update', update)
 provide('selected', selected)
 const isMyTurn = computed(() => state.game.you === state.game.nextPlayer)
 const disabled = computed(() => ({
-  undo: state.game.ground.length < 1 || state.game.you === state.game.nextPlayer,
+  undo: state.game.ground.length < 1,
   nextRound: state.game.players.you.length !== 0 && state.game.players.other.length !== 0,
   play: selected.value.length === 0 || !isMyTurn.value,
   pass: !isMyTurn.value,
@@ -34,13 +49,14 @@ const banners = computed(() => [
   `当前玩家 ${state.game.you}`,
   `玩家 ${state.game.nextPlayer} 出牌`,
 ].join(' | '))
+const otherVisible = computed(() => state.game.players.other.length === 0 || state.game.players.you.length === 0)
 </script>
 <template>
   <div class="game">
     <div class="banner">
       {{ banners }}
     </div>
-    <Deck :cards="state.game.players.other" />
+    <Deck :cards="state.game.players.other" :visible="otherVisible" />
     <Deck :cards="state.game.ground[state.game.ground.length - 1] ?? []" visible />
     <div class="actions" :class="{ visible: isMyTurn }">
       <button @click="pass" :disabled="disabled.pass">不出</button>
@@ -55,6 +71,7 @@ const banners = computed(() => [
       <button class="secondary" @click="giveCards">进贡</button>
     </div>
   </div>
+  <Notifications />
 </template>
 <style>
 .game {

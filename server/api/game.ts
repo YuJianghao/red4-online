@@ -14,6 +14,13 @@ function sortCard(cards: number[]) {
   })
 }
 
+interface Notification {
+  id: string
+  content: string
+  duration: number
+  type: string
+}
+
 class Game {
   deck: number[] = []
   players: { a: number[]; b: number[] } = { a: [], b: [] }
@@ -21,6 +28,7 @@ class Game {
   nextPlayer: Player = "a"
   first = false
   hearts = { a: -1, b: -1 }
+  notifications: { a: Notification[]; b: Notification[] } = { a: [], b: [] }
 
   get round() {
     return this.deck.length === 0 ? 2 : 1
@@ -77,8 +85,14 @@ class Game {
     this.updateNextPlayer()
   }
 
-  undo() {
+  undo(player: Player) {
+    const other = player === "a" ? "b" : "a"
     const lastPlayer = this.nextPlayer === "a" ? "b" : "a"
+    if (player !== lastPlayer) {
+      this.addNotification(player, "已向对方申请悔棋", "info")
+      this.addNotification(other, "对方申请悔棋", "info")
+      return
+    }
     const lastCards = this.ground.pop()
     if (lastCards) {
       this.players[lastPlayer].push(...lastCards)
@@ -87,8 +101,18 @@ class Game {
     }
   }
 
+  addNotification(player: Player, content: string, type: string) {
+    this.notifications[player].push({
+      id: Math.random().toString(),
+      content,
+      duration: 3000,
+      type,
+    })
+  }
+
   giveCards(player: Player, cards: number[]) {
     const other = player === "a" ? "b" : "a"
+    this.addNotification(other, `对方给你进贡了 ${cards.length} 张牌`, "give")
     this.players[other] = sortCard(this.players[other].concat(cards))
     this.players[player] = this.players[player].filter(
       (card) => !cards.includes(card)
@@ -110,6 +134,12 @@ class Game {
       round: this.round,
       hearts: this.hearts,
     }
+  }
+
+  getNotifications(player: Player) {
+    const notifications = this.notifications[player]
+    this.notifications[player] = []
+    return notifications
   }
 }
 
@@ -144,11 +174,13 @@ const stateHandler = defineEventHandler(async (event) => {
   return {
     game: game.getState(player),
     time: +Date.now(),
+    notifications: game.getNotifications(player),
   }
 })
 
 const undoHandler = defineEventHandler(async (event) => {
-  game.undo()
+  const player = event.context.id as Player
+  game.undo(player)
 })
 
 export default defineEventHandler(async (event) => {
