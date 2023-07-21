@@ -50,11 +50,6 @@ export default {
   backdrop-filter: blur(4px);
 }
 
-.modal-content {
-  background-color: #fff;
-  border-radius: 30px;
-}
-
 .modal-content button {
   display: block;
   width: 100vw;
