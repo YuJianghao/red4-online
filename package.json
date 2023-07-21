@@ -10,10 +10,15 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@types/lodash-es": "^4.17.8",
     "@types/node": "^18.16.19",
-    "nuxt": "^3.6.2"
+    "happy-dom": "^10.5.2",
+    "nuxt": "^3.6.2",
+    "nuxt-vitest": "^0.10.1",
+    "vitest": "^0.33.0"
   },
   "dependencies": {
-    "@vueuse/core": "^10.2.1"
+    "@vueuse/core": "^10.2.1",
+    "lodash-es": "^4.17.21"
   }
 }
