@@ -49,6 +49,8 @@ class Game {
     this.hearts = { a: -1, b: -1 }
     this.ground = []
     this.updateNextPlayer()
+    this.addNotification("a", `Round ${this.round}`, "start", 1000)
+    this.addNotification("b", `Round ${this.round}`, "start", 1000)
   }
 
   updateNextPlayer() {
@@ -101,11 +103,16 @@ class Game {
     }
   }
 
-  addNotification(player: Player, content: string, type: string) {
+  addNotification(
+    player: Player,
+    content: string,
+    type: string,
+    duration = 3000
+  ) {
     this.notifications[player].push({
       id: Math.random().toString(),
       content,
-      duration: 3000,
+      duration,
       type,
     })
   }

@@ -8,13 +8,16 @@ const state = inject('state')
       :key="notification.id">
       {{ notification.content }}
     </div>
+    <!-- <div class="notification start">Round 1</div> -->
   </transition-group>
 </template>
 <style>
 .notification-enter-active,
 .notification-leave-active {
-  transition: all 1s;
+  transition: all 1s ease-in-out;
 }
+
+
 
 .notification-enter-from {
   opacity: 0;
@@ -24,6 +27,20 @@ const state = inject('state')
 .notification-leave-to {
   opacity: 0;
   transform: translateY(-30px);
+}
+
+.notification-enter-active.start,
+.notification-leave-active.start {
+  transition: all .5s ease-in-out;
+}
+
+
+.notification-enter-from.start {
+  transform: scale(10);
+}
+
+.notification-leave-to.start {
+  transform: translateX(100%);
 }
 
 .notifications {
@@ -49,7 +66,12 @@ const state = inject('state')
   font-style: italic;
   color: white;
   background-color: #77777777;
-  backdrop-filter: blur(20px);
+}
+
+.notification.start {
+  background-color: transparent;
+  color: #ff7b00;
+  font-size: xx-large;
 }
 
 .notification.info {
@@ -57,6 +79,6 @@ const state = inject('state')
 }
 
 .notification.give {
-  background-color: rgb(255, 123, 0);
+  background-color: #ff7b00;
 }
 </style>
